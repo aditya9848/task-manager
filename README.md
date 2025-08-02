@@ -25,6 +25,3 @@ A simple **Java Spring Boot** web application to manage daily tasks. Users can c
 - Railway (for deployment)
 
 ---
-
-## 📂 Project Structure
-
