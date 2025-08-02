@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Manager</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        input, button { padding: 8px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>📝 Task Manager</h1>
+    <input id="taskInput" placeholder="Enter new task" />
+    <button onclick="addTask()">Add</button>
+    <ul id="taskList"></ul>
+
+    <script>
+        const API = 'http://localhost:8080/api/tasks';
+
+        function fetchTasks() {
+            fetch(API).then(res => res.json()).then(tasks => {
+                const list = document.getElementById('taskList');
+                list.innerHTML = '';
+                tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggle(${task.id}, ${!task.completed})"/>
+                        ${task.description}
+                        <button onclick="remove(${task.id})">❌</button>
+                    `;
+                    list.appendChild(li);
+                });
+            });
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            fetch(API, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ description: input.value, completed: false })
+            }).then(() => {
+                input.value = '';
+                fetchTasks();
+            });
+        }
+
+        function toggle(id, status) {
+            fetch(`${API}/${id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ completed: status, description: "" }) // blank desc will be overwritten
+            }).then(() => fetchTasks());
+        }
+
+        function remove(id) {
+            fetch(`${API}/${id}`, { method: 'DELETE' }).then(() => fetchTasks());
+        }
+
+        window.onload = fetchTasks;
+    </script>
+</body>
+</html>
